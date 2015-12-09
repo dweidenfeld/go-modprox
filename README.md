@@ -3,6 +3,10 @@ ModProx is a modification proxy for html documents. You can simply start it and 
 
 ModProx is written in GO.
 
+## Download (latest binary)
+* [Current Branch Binary](/bin/go-modprox)
+* [Latest Binary](https://github.com/dweidenfeld/go-modprox/tree/master/bin/go-modprox)
+
 ## Usage
 Just create a config.json file and put it next to the executable and start it by executing
 
