@@ -35,12 +35,12 @@ The config.json file could look like this:
       "appendTo": "title"
     },
     {
-      "urlMatch": "^http:\\/\\/jobs\\.daimler\\.com\\/.*",
+      "urlMatch": "^http:\\/\\/example\\.com\\/.*",
       "selector": ".meta-info-data > span",
       "attribute": "class",
-      "index": 0,
+      "index": 2,
       "trim": true,
-      "wrapper": "<meta name=\"job_nr\" content=\"%s\"/>",
+      "wrapper": "<meta name=\"id\" content=\"%s\"/>",
       "appendTo": "head"
     }
   ]
