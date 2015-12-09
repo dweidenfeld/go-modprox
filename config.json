@@ -1,0 +1,39 @@
+{
+  "port": 8080,
+  "modifications": [
+    {
+      "urlMatch": "^http:\\/\\/jobs\\.daimler\\.com\\/.*",
+      "selector": "h1",
+      "appendTo": "title"
+    },
+    {
+      "urlMatch": "^http:\\/\\/jobs\\.daimler\\.com\\/.*",
+      "selector": ".meta-info-data > span",
+      "index": 0,
+      "wrapper": "<meta name=\"job_nr\" content=\"%s\"/>",
+      "appendTo": "head"
+    },
+    {
+      "urlMatch": "^http:\\/\\/jobs\\.daimler\\.com\\/.*",
+      "selector": ".meta-info-data > span",
+      "index": 1,
+      "wrapper": "<meta name=\"pub_date\" content=\"%s\"/>",
+      "appendTo": "head"
+    },
+    {
+      "urlMatch": "^http:\\/\\/jobs\\.daimler\\.com\\/.*",
+      "selector": ".meta-info-data > span",
+      "index": 2,
+      "wrapper": "<meta name=\"activity\" content=\"%s\"/>",
+      "appendTo": "head"
+    },
+    {
+      "urlMatch": "^http:\\/\\/jobs\\.daimler\\.com\\/.*",
+      "selector": ".meta-info-data > span",
+      "index": 3,
+      "trim": true,
+      "wrapper": "<meta name=\"department\" content=\"%s\"/>",
+      "appendTo": "head"
+    }
+  ]
+}
