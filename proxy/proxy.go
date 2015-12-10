@@ -230,11 +230,13 @@ func (p Proxy) modify(d *goquery.Document, url string) {
 			continue;
 		}
 		elm := e.Get(i)
-		t := d.Find(mod.AppendTo)
-		if 0 == t.Length() {
-			log.Printf("No element found for selector %s (%s)", mod.Selector, url)
+
+		t, tMode, err := target(mod, d)
+		if nil != err {
+			log.Printf("%s (%s)", err, url)
 			continue;
 		}
+
 		var v string
 		if 0 < len(mod.Attribute) {
 			for _, attr := range elm.Attr {
@@ -251,6 +253,36 @@ func (p Proxy) modify(d *goquery.Document, url string) {
 		if 0 < len(mod.Wrapper) && strings.Contains(mod.Wrapper, "%s") {
 			v = fmt.Sprintf(mod.Wrapper, v)
 		}
-		t.AppendHtml(v)
+
+		switch tMode {
+		case APPEND:
+			t.AppendHtml(v)
+			break;
+		case REPLACE:
+			t.ReplaceWithHtml(v)
+			break;
+		default:
+			log.Printf("No action (replace/append) found for %s", url)
+		}
 	}
+}
+
+func target(mod Modification, d *goquery.Document) (*goquery.Selection, int, error) {
+	var m int
+	var s string
+	var t *goquery.Selection
+	if 0 < len(mod.AppendTo) {
+		m = APPEND
+		s = mod.AppendTo
+		t = d.Find(mod.AppendTo)
+	} else if 0 < len(mod.Replace) {
+		m = REPLACE
+		s = mod.Replace
+		t = d.Find(mod.Replace)
+	}
+
+	if 0 == t.Length() {
+		return nil, m, errors.New(fmt.Sprintf("No element found for selector %s", s))
+	}
+	return t, m, nil
 }

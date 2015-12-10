@@ -4,11 +4,20 @@ import (
 	"encoding/json"
 )
 
+// Config is the configuration base structure
 type Config struct {
 	Port          int               `json:"port"`
+	SSL           SSL               `json:"ssl"`
 	Modifications []Modification    `json:"modifications"`
 }
 
+// SSL settings for ssl configuration
+type SSL struct {
+	Cert string `json:"cert"`
+	Key  string `json:"key"`
+}
+
+// Modifications describes each modification to be executed
 type Modification struct {
 	URLMatch  string    `json:"urlMatch"`
 	Selector  string    `json:"selector"`
@@ -16,9 +25,17 @@ type Modification struct {
 	Attribute string    `json:"attribute"`
 	Wrapper   string    `json:"wrapper"`
 	AppendTo  string    `json:"appendTo"`
+	Replace   string    `json:"replace"`
 	Trim      bool      `json:"trim"`
 }
 
+// Replace or Append options
+const (
+	APPEND = iota
+	REPLACE = iota
+)
+
+// ReadConfigFromFile reads the configuration from a file
 func ReadConfigFromFile(file string) (Config, error) {
 	config := Config{
 		Port: 8080,

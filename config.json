@@ -4,7 +4,8 @@
     {
       "urlMatch": "^http:\\/\\/jobs\\.daimler\\.com\\/.*",
       "selector": "h1",
-      "appendTo": "title"
+      "wrapper": "<title>%s</title>",
+      "replace": "title"
     },
     {
       "urlMatch": "^http:\\/\\/jobs\\.daimler\\.com\\/.*",

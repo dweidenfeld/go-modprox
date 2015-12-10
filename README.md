@@ -16,27 +16,36 @@ Just create a config.json file and put it next to the executable and start it by
 The config.json file could look like this:
 
 ### Options
-| Key                      | Description                                                                                               |
-|--------------------------|-----------------------------------------------------------------------------------------------------------|
-| port                     | The port to bind on                                                                                       |
-| modifications            | A list of modifications that should be processed                                                          |
-| modification[].urlMatch  | RegEx matching URL to process the modification                                                            |
-| modification[].selector  | The CSS selector from the element you want to get                                                         |
-| modification[].appendTo  | The element to append the text on                                                                         |
-| modification[].attribute | If you want to get an attributes value instead of the text content                                        |
-| modification[].index     | If there are multiple matches for the selector, the index describes which one should be used (zero-based) |
-| modification[].trim      | If the value should be trimmed before attached to "appendTo" or the "wrapper"                             |
-| modification[].wrapper   | A wrapper function to wrap the value                                                                      |
+| Key                      | Description                                                                                               | Mandatory   |
+|--------------------------|-----------------------------------------------------------------------------------------------------------|-------------|
+| port                     | The port to bind on                                                                                       | YES         |
+| ssl                      | Configuration options for SSL connection                                                                  | NO          |
+| ssl.cert                 | Path to the cert (.pem) file                                                                              | YES if SSL  |
+| ssl.key                  | Path to the key (.key) file                                                                               | YES if SSL  |
+| modifications            | A list of modifications that should be processed                                                          | YES         |
+| modification[].urlMatch  | RegEx matching URL to process the modification                                                            | YES         |
+| modification[].selector  | The CSS selector from the element you want to get                                                         | YES         |
+| modification[].appendTo  | The element to append the text on                                                                         | OR replace  |
+| modification[].replace   | The element to be replaced                                                                                | OR appendTo |
+| modification[].attribute | If you want to get an attributes value instead of the text content                                        | NO          |
+| modification[].index     | If there are multiple matches for the selector, the index describes which one should be used (zero-based) | NO          |
+| modification[].trim      | If the value should be trimmed before attached to "appendTo" or the "wrapper"                             | NO          |
+| modification[].wrapper   | A wrapper function to wrap the value                                                                      | NO          |
 
 ### Example
 ```json
 {
   "port": 8080,
+  "ssl": {
+    "cert": "ssl/server.pem",
+    "key": "ssl/server.key"
+  },
   "modifications": [
     {
       "urlMatch": "^http:\\/\\/example\\.com\\/.*",
       "selector": "h1",
-      "appendTo": "title"
+      "wrapper": "<title>%s</title>",
+      "replace": "title"
     },
     {
       "urlMatch": "^http:\\/\\/example\\.com\\/.*",
