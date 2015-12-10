@@ -1,7 +1,7 @@
 package main
 
 import (
-	"./proxy"
+	"github.com/dweidenfeld/modprox/proxy"
 	"net/http"
 	"fmt"
 	"log"
