@@ -7,14 +7,8 @@ import (
 // Config is the configuration base structure
 type Config struct {
 	Port          int               `json:"port"`
-	SSL           SSL               `json:"ssl"`
+	SSLRewrite    []string          `json:"sslRewrite"`
 	Modifications []Modification    `json:"modifications"`
-}
-
-// SSL settings for ssl configuration
-type SSL struct {
-	Cert string `json:"cert"`
-	Key  string `json:"key"`
 }
 
 // Modifications describes each modification to be executed

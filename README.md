@@ -19,9 +19,7 @@ The config.json file could look like this:
 | Key                      | Description                                                                                               | Mandatory   |
 |--------------------------|-----------------------------------------------------------------------------------------------------------|-------------|
 | port                     | The port to bind on                                                                                       | YES         |
-| ssl                      | Configuration options for SSL connection                                                                  | NO          |
-| ssl.cert                 | Path to the cert (.pem) file                                                                              | YES if SSL  |
-| ssl.key                  | Path to the key (.key) file                                                                               | YES if SSL  |
+| sslRewrite               | A list of domains that should be called over http instead of https                                        | NO          |
 | modifications            | A list of modifications that should be processed                                                          | YES         |
 | modification[].urlMatch  | RegEx matching URL to process the modification                                                            | YES         |
 | modification[].selector  | The CSS selector from the element you want to get                                                         | YES         |
@@ -36,19 +34,18 @@ The config.json file could look like this:
 ```json
 {
   "port": 8080,
-  "ssl": {
-    "cert": "ssl/server.pem",
-    "key": "ssl/server.key"
-  },
+  "sslRewrite": [
+    "www.example.com"
+  ],
   "modifications": [
     {
-      "urlMatch": "^http:\\/\\/example\\.com\\/.*",
+      "urlMatch": "^http:\\/\\/www\\.example\\.com\\/.*",
       "selector": "h1",
       "wrapper": "<title>%s</title>",
       "replace": "title"
     },
     {
-      "urlMatch": "^http:\\/\\/example\\.com\\/.*",
+      "urlMatch": "^http:\\/\\/www\\.example\\.com\\/.*",
       "selector": ".meta-info-data > span",
       "attribute": "class",
       "index": 2,

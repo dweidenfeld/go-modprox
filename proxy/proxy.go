@@ -2,20 +2,14 @@ package proxy
 
 import (
 	"net/http"
-	"io/ioutil"
 	"io"
 	"strings"
 	"compress/gzip"
 	"bytes"
 	"strconv"
 	"log"
-	"errors"
 	"regexp"
-	"crypto/tls"
-
 	"github.com/PuerkitoBio/goquery"
-	"github.com/djimenez/iconv-go"
-	"net/url"
 	"fmt"
 )
 
@@ -33,6 +27,7 @@ func New(c Config) Proxy {
 func (p Proxy) Handler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		url := normalizeURL(r.URL)
+		log.Printf("Processing: %s", url)
 
 		res, err := request(r)
 		if nil != err {
@@ -72,106 +67,6 @@ func (p Proxy) Handler() http.HandlerFunc {
 	}
 }
 
-// encoding extracts the Content-Encoding
-func encoding(h http.Header) string {
-	return h.Get("Content-Encoding")
-}
-
-// contentType extract the Content-Type
-func contentType(h http.Header) string {
-	return h.Get("Content-Type")
-}
-
-// normalizeURL normalizes the url and checks if all parameters are set correctly
-func normalizeURL(url *url.URL) string {
-	if "" == url.Scheme {
-		if strings.Contains(url.String(), ":443") {
-			url.Scheme = "https"
-		} else {
-			url.Scheme = "http"
-		}
-	}
-	return url.String()
-}
-
-// read reads a stream based on its encoding
-func read(enc string, ct string, body io.ReadCloser) (string, error) {
-	defer body.Close()
-	var cs string
-	if strings.Contains(ct, "charset") {
-		cs = ct[(strings.Index(ct, "charset=") + 8):]
-	} else {
-		cs = "ISO-8859-1"
-	}
-
-	var s io.Reader
-	if enc == "gzip" {
-		reader, err := gzip.NewReader(body)
-		if nil != err {
-			return "", err
-		}
-		s = reader
-	} else {
-		s = body
-	}
-	if strings.ToLower(cs) != "utf-8" {
-		us, err := iconv.NewReader(s, cs, "utf-8")
-		if nil == err {
-			s = us
-		} else {
-			log.Printf("Cannot convert %s to utf-8", ct)
-		}
-	}
-	b, err := ioutil.ReadAll(s)
-	if nil != err {
-		return "", err
-	}
-	return string(b), nil
-}
-
-// isHtml checks if the document is an html document
-func isHtml(ct string) bool {
-	return strings.Contains(ct, "text/html")
-}
-
-// passthrough is a fallback if the document should not be handled
-func passthrough(r *http.Response, w http.ResponseWriter) error {
-	if nil == r {
-		return errors.New("Response is unset")
-	}
-	for h, v := range r.Header {
-		for _, val := range v {
-			w.Header().Add(h, val)
-		}
-	}
-	io.Copy(w, r.Body)
-	return nil
-}
-
-// request executes an http request based on the initial proxy call
-func request(r *http.Request) (*http.Response, error) {
-	url := r.URL.String()
-	header := r.Header
-	method := r.Method
-
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	client := &http.Client{Transport: tr}
-	req, err := http.NewRequest(method, url, nil)
-	if nil != err {
-		return nil, err
-	}
-
-	for h, v := range header {
-		for _, val := range v {
-			req.Header.Add(h, val)
-		}
-	}
-
-	return client.Do(req)
-}
-
 // proxy forwards the manipulated content to the output writer
 func (p Proxy) proxy(w http.ResponseWriter, content string, header http.Header, url string) error {
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(content))
@@ -185,6 +80,8 @@ func (p Proxy) proxy(w http.ResponseWriter, content string, header http.Header, 
 	if nil != err {
 		return err
 	}
+
+	c = p.sslRewrite(c)
 
 	if encoding(header) == "gzip" {
 		var b bytes.Buffer
@@ -217,6 +114,13 @@ func (p Proxy) proxy(w http.ResponseWriter, content string, header http.Header, 
 	return nil
 }
 
+func (p Proxy) sslRewrite(c string) string {
+	for _, rw := range p.Config.SSLRewrite {
+		c = strings.Replace(c, fmt.Sprintf("https://%s", rw), fmt.Sprintf("http://%s", rw), -1)
+	}
+	return c
+}
+
 // modify manipulates the document based on the configuration
 func (p Proxy) modify(d *goquery.Document, url string) {
 	for _, mod := range p.Config.Modifications {
@@ -225,7 +129,7 @@ func (p Proxy) modify(d *goquery.Document, url string) {
 		}
 		i := mod.Index
 		e := d.Find(mod.Selector)
-		if i > e.Length() {
+		if i >= e.Length() {
 			log.Printf("No element found for selector %s on index %d (%s)", mod.Selector, i, url)
 			continue;
 		}
@@ -265,24 +169,4 @@ func (p Proxy) modify(d *goquery.Document, url string) {
 			log.Printf("No action (replace/append) found for %s", url)
 		}
 	}
-}
-
-func target(mod Modification, d *goquery.Document) (*goquery.Selection, int, error) {
-	var m int
-	var s string
-	var t *goquery.Selection
-	if 0 < len(mod.AppendTo) {
-		m = APPEND
-		s = mod.AppendTo
-		t = d.Find(mod.AppendTo)
-	} else if 0 < len(mod.Replace) {
-		m = REPLACE
-		s = mod.Replace
-		t = d.Find(mod.Replace)
-	}
-
-	if 0 == t.Length() {
-		return nil, m, errors.New(fmt.Sprintf("No element found for selector %s", s))
-	}
-	return t, m, nil
 }

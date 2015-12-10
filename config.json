@@ -1,39 +1,70 @@
 {
   "port": 8080,
+  "sslRewrite": [
+    "www.persona.de"
+  ],
   "modifications": [
     {
-      "urlMatch": "^http:\\/\\/jobs\\.daimler\\.com\\/.*",
+      "urlMatch": "^http:\/\/www\\.persona\\.de\\/.*",
       "selector": "h1",
+      "index": 1,
       "wrapper": "<title>%s</title>",
       "replace": "title"
     },
     {
-      "urlMatch": "^http:\\/\\/jobs\\.daimler\\.com\\/.*",
-      "selector": ".meta-info-data > span",
+      "urlMatch": "^http:\/\/www\\.persona\\.de\\/.*",
+      "selector": ".meta-data td",
       "index": 0,
-      "wrapper": "<meta name=\"job_nr\" content=\"%s\"/>",
+      "trim": true,
+      "wrapper": "<meta name=\"reference_nr\" content=\"%s\"/>",
       "appendTo": "head"
     },
     {
-      "urlMatch": "^http:\\/\\/jobs\\.daimler\\.com\\/.*",
-      "selector": ".meta-info-data > span",
+      "urlMatch": "^http:\/\/www\\.persona\\.de\\/.*",
+      "selector": ".meta-data td",
       "index": 1,
-      "wrapper": "<meta name=\"pub_date\" content=\"%s\"/>",
+      "trim": true,
+      "wrapper": "<meta name=\"location\" content=\"%s\"/>",
       "appendTo": "head"
     },
     {
-      "urlMatch": "^http:\\/\\/jobs\\.daimler\\.com\\/.*",
-      "selector": ".meta-info-data > span",
+      "urlMatch": "^http:\/\/www\\.persona\\.de\\/.*",
+      "selector": ".meta-data td",
       "index": 2,
-      "wrapper": "<meta name=\"activity\" content=\"%s\"/>",
+      "trim": true,
+      "wrapper": "<meta name=\"worktime\" content=\"%s\"/>",
       "appendTo": "head"
     },
     {
-      "urlMatch": "^http:\\/\\/jobs\\.daimler\\.com\\/.*",
-      "selector": ".meta-info-data > span",
+      "urlMatch": "^http:\/\/www\\.persona\\.de\\/.*",
+      "selector": ".meta-data td",
       "index": 3,
       "trim": true,
-      "wrapper": "<meta name=\"department\" content=\"%s\"/>",
+      "wrapper": "<meta name=\"salary\" content=\"%s\"/>",
+      "appendTo": "head"
+    },
+    {
+      "urlMatch": "^http:\/\/www\\.persona\\.de\\/.*",
+      "selector": ".meta-data td",
+      "index": 4,
+      "trim": true,
+      "wrapper": "<meta name=\"driving_license\" content=\"%s\"/>",
+      "appendTo": "head"
+    },
+    {
+      "urlMatch": "^http:\/\/www\\.persona\\.de\\/.*",
+      "selector": ".meta-data td",
+      "index": 5,
+      "trim": true,
+      "wrapper": "<meta name=\"work_begin\" content=\"%s\"/>",
+      "appendTo": "head"
+    },
+    {
+      "urlMatch": "^http:\/\/www\\.persona\\.de\\/.*",
+      "selector": ".meta-data td",
+      "index": 6,
+      "trim": true,
+      "wrapper": "<meta name=\"vacancy_count\" content=\"%s\"/>",
       "appendTo": "head"
     }
   ]
