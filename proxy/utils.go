@@ -2,8 +2,6 @@ package proxy
 
 import (
 	"strings"
-	"github.com/djimenez/iconv-go"
-	"log"
 	"io/ioutil"
 	"net/http"
 	"errors"
@@ -45,12 +43,6 @@ func normalizeURL(url *url.URL) string {
 // read reads a stream based on its encoding
 func read(enc string, ct string, body io.ReadCloser) (string, error) {
 	defer body.Close()
-	var cs string
-	if strings.Contains(ct, "charset") {
-		cs = ct[(strings.Index(ct, "charset=") + 8):]
-	} else {
-		cs = "ISO-8859-1"
-	}
 
 	var s io.Reader
 	if enc == "gzip" {
@@ -62,18 +54,12 @@ func read(enc string, ct string, body io.ReadCloser) (string, error) {
 	} else {
 		s = body
 	}
-	if strings.ToLower(cs) != "utf-8" {
-		us, err := iconv.NewReader(s, cs, "utf-8")
-		if nil == err {
-			s = us
-		} else {
-			log.Printf("Cannot convert %s to utf-8", ct)
-		}
-	}
+
 	b, err := ioutil.ReadAll(s)
 	if nil != err {
 		return "", err
 	}
+
 	return string(b), nil
 }
 
@@ -107,10 +93,17 @@ func request(r *http.Request) (*http.Response, error) {
 	}
 
 	for h, v := range header {
-		for _, val := range v {
-			req.Header.Add(h, val)
+		switch strings.ToLower(h) {
+		case "accept-charset":
+			break;
+		default:
+			for _, val := range v {
+				req.Header.Add(h, val)
+			}
+			break;
 		}
 	}
+	req.Header.Add("Accept-Charset", "utf-8")
 
 	return client.Do(req)
 }

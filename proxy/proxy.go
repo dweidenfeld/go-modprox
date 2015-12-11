@@ -99,8 +99,8 @@ func (p Proxy) proxy(w http.ResponseWriter, content string, header http.Header, 
 	}
 
 	for h, v := range header {
-		switch h {
-		case "Content-Length":
+		switch strings.ToLower(h) {
+		case "content-length":
 			w.Header().Add("Content-Length", strconv.Itoa(len(c)))
 			break;
 		default:
