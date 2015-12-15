@@ -10,7 +10,7 @@ ModProx is written in GO.
 ## Usage
 Just create a config.json file and put it next to the executable and start it by executing
 
-    ./go-modprox
+    ./modprox
 
 ## Configuration
 The config.json file could look like this:
