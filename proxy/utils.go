@@ -11,6 +11,7 @@ import (
 	"compress/gzip"
 	"github.com/PuerkitoBio/goquery"
 	"fmt"
+	"regexp"
 )
 
 // encoding extracts the Content-Encoding
@@ -38,6 +39,15 @@ func normalizeURL(url *url.URL) string {
 		}
 	}
 	return url.String()
+}
+
+// trim trims a value in a normalized form (exclude all non alphanumeric characters)
+func trim(val string) (string, error) {
+	re, err := regexp.Compile("[^0-9a-zA-Z]{2,}")
+	if nil != err {
+		return "", err
+	}
+	return strings.TrimSpace(re.ReplaceAllString(val, " ")), nil
 }
 
 // read reads a stream based on its encoding

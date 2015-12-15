@@ -152,7 +152,12 @@ func (p Proxy) modify(d *goquery.Document, url string) {
 			v = elm.FirstChild.Data
 		}
 		if (mod.Trim) {
-			v = strings.TrimSpace(v)
+			tVal, tErr := trim(v)
+			if nil != tErr {
+				log.Printf("Cannot trim value '%s' (%s)", v, url)
+			} else {
+				v = tVal
+			}
 		}
 		if 0 < len(mod.Wrapper) && strings.Contains(mod.Wrapper, "%s") {
 			v = fmt.Sprintf(mod.Wrapper, v)
